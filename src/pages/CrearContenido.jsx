@@ -103,6 +103,13 @@ export default function CrearContenido({ empresa, onCambiarEmpresa }) {
 
   // --- Webhook n8n ---
   const callWebhook = async (accion, ideaPayload) => {
+    console.log('Enviando al webhook:', {
+      empresa_id: empresa.id,
+      red_social: redSocial,
+      idea: ideaPayload ?? idea,
+      accion,
+      imagen_url: imagenUrl || "",
+    });
     const res = await fetch(import.meta.env.VITE_N8N_WEBHOOK, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
