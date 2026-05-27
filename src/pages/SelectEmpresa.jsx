@@ -5,10 +5,8 @@ import EmpresaCard from "../components/EmpresaCard";
 import NuevaEmpresaForm from "../components/NuevaEmpresaForm";
 import Loader from "../components/Loader";
 
-const SUPABASE_URL =
-  "https://mqyzlghrllymakvboqao.supabase.co/rest/v1/empresas?select=id,nombre,created_at&order=created_at.desc";
-const SUPABASE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xeXpsZ2hybGx5bWFrdmJvcWFvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODY2OTQ3MywiZXhwIjoyMDk0MjQ1NDczfQ.LdVblSGKxSkcI22n7ZU1oSm3_r0pfE_GuCCMdDTYFLY";
+const SUPABASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/empresas?select=id,nombre,created_at&order=created_at.desc`;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 
 export default function SelectEmpresa() {
   const [empresas, setEmpresas] = useState([]);
