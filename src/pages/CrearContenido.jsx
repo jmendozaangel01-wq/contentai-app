@@ -44,14 +44,29 @@ export default function CrearContenido({ empresa, onCambiarEmpresa }) {
   }, [chatMessages, chatLoading]);
 
   // --- n8n Refinar ---
+  const obtenerContextoMarca = async (empresaId) => {
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/empresas?id=eq.${empresaId}&select=contexto_marca`,
+      {
+        headers: {
+          apikey: import.meta.env.VITE_SUPABASE_KEY,
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_KEY}`,
+        },
+      }
+    );
+    const data = await response.json();
+    return data[0]?.contexto_marca || "";
+  };
+
   const callN8nRefinar = async (mensaje, historial) => {
     setChatLoading(true);
     setChatError(null);
     try {
+      const contextoMarca = await obtenerContextoMarca(empresa.id);
       const res = await fetch(import.meta.env.VITE_N8N_REFINAR, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensaje, historial }),
+        body: JSON.stringify({ mensaje, historial, contexto_marca: contextoMarca, red_social: redSocial }),
       });
       const data = await res.json();
       const updatedHistory = data.historial ?? [
@@ -77,9 +92,7 @@ export default function CrearContenido({ empresa, onCambiarEmpresa }) {
   };
 
   const handleRefinarIdea = async () => {
-    const mensaje = idea.trim()
-      ? `Quiero crear contenido para ${redSocial}. Mi idea: ${idea}`
-      : `Quiero crear contenido para ${redSocial}. No tengo idea definida, ayúdame a definir una.`;
+    const mensaje = idea.trim() || "No tengo idea definida, ayúdame a definir una.";
     setChatMessages([{ role: "user", content: mensaje }]);
     setShowChat(true);
     await callN8nRefinar(mensaje, []);
