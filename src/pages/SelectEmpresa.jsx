@@ -8,7 +8,7 @@ import Loader from "../components/Loader";
 const SUPABASE_URL = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/empresas?select=id,nombre,created_at&order=created_at.desc`;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 
-export default function SelectEmpresa() {
+export default function SelectEmpresa({ onSelectEmpresa }) {
   const [empresas, setEmpresas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -32,6 +32,11 @@ export default function SelectEmpresa() {
   };
 
   useEffect(() => { fetchEmpresas(); }, []);
+
+  const handleSelect = (empresa) => {
+    setSelected(empresa);
+    setTimeout(() => onSelectEmpresa(empresa), 800);
+  };
 
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-white">
@@ -79,7 +84,7 @@ export default function SelectEmpresa() {
                 <EmpresaCard
                   key={empresa.id}
                   empresa={empresa}
-                  onSelect={setSelected}
+                  onSelect={handleSelect}
                 />
               ))
             )}
