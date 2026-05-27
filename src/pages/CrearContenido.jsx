@@ -391,28 +391,24 @@ export default function CrearContenido({ empresa, onCambiarEmpresa }) {
             </div>
 
             {/* Botones de acción */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 p-3 bg-[#0D0D0D] rounded-xl">
               {ACTION_BUTTONS.map(({ icon, label, tooltip }) => {
                 const enabled = !!imagenUrl && !generando;
                 return (
-                  <div key={label} className="relative group flex-1">
-                    <button
-                      onClick={() => handleActionClick(label)}
-                      disabled={!enabled}
-                      className={`w-full flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border text-xs font-medium transition-colors disabled:cursor-not-allowed ${
-                        enabled
-                          ? "bg-[#1A1A1A] border-[#2A2A2A] text-[#888888] hover:border-[#00D084] hover:text-[#00D084]"
-                          : "bg-[#1A1A1A] border-[#2A2A2A] text-[#444444] opacity-40"
-                      }`}
-                    >
-                      <span>{icon}</span>
-                      <span>{label}</span>
-                    </button>
-                    {/* Tooltip */}
-                    <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#2A2A2A] border border-[#333333] text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                      {tooltip}
-                    </div>
-                  </div>
+                  <button
+                    key={label}
+                    onClick={() => handleActionClick(label)}
+                    disabled={!enabled}
+                    title={tooltip}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border text-sm font-medium transition-colors ${
+                      enabled
+                        ? "bg-[#1A1A1A] border-[#2A2A2A] text-white hover:border-[#00D084] cursor-pointer"
+                        : "bg-[#1A1A1A] border-[#2A2A2A] text-white opacity-40 cursor-not-allowed"
+                    }`}
+                  >
+                    <span>{icon}</span>
+                    <span>{label}</span>
+                  </button>
                 );
               })}
             </div>
