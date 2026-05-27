@@ -232,7 +232,7 @@ export default function CrearContenido({ empresa, onCambiarEmpresa }) {
             </div>
 
             {/* Pills de red social */}
-            <div className="mb-2">
+            <div className="mb-6">
               <p className="text-xs text-[#888888] mb-3 uppercase tracking-wider">Red social</p>
               <div className="flex flex-wrap gap-2">
                 {REDES.map((red) => (
