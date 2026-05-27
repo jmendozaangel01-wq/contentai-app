@@ -5,8 +5,6 @@ import Loader from "../components/Loader";
 
 const REDES = ["Instagram", "Facebook", "LinkedIn", "TikTok"];
 
-const SYSTEM_PROMPT =
-  "Eres un estratega creativo de contenido para redes sociales. Tu trabajo es ayudar al usuario a refinar su idea para crear contenido visual impactante. Haz máximo 2 preguntas cortas y concretas para entender mejor la idea. Cuando tengas suficiente contexto, di 'IDEA LISTA:' seguido de un resumen conciso de la idea refinada lista para generar. Sé directo y conciso.";
 
 const ACTION_BUTTONS = [
   { icon: "✏️", label: "Editar", tooltip: "Modifica elementos específicos" },
@@ -24,6 +22,7 @@ export default function CrearContenido({ empresa, onCambiarEmpresa }) {
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
+  const [chatError, setChatError] = useState(null);
   const chatEndRef = useRef(null);
 
   // Generación
@@ -44,61 +43,55 @@ export default function CrearContenido({ empresa, onCambiarEmpresa }) {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages, chatLoading]);
 
-  // --- Claude API ---
-  const callClaude = async (messages) => {
+  // --- n8n Refinar ---
+  const callN8nRefinar = async (mensaje, historial) => {
     setChatLoading(true);
+    setChatError(null);
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch(import.meta.env.VITE_N8N_REFINAR, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-allow-browser": "true",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-5",
-          max_tokens: 500,
-          system: SYSTEM_PROMPT,
-          messages,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mensaje, historial }),
       });
       const data = await res.json();
-      const assistantText = data.content[0].text;
-      const updated = [...messages, { role: "assistant", content: assistantText }];
-      setChatMessages(updated);
+      const updatedHistory = data.historial ?? [
+        ...historial,
+        { role: "user", content: mensaje },
+        { role: "assistant", content: data.respuesta },
+      ];
+      setChatMessages(updatedHistory);
 
-      if (assistantText.includes("IDEA LISTA:")) {
-        const ideaRefinada = assistantText.split("IDEA LISTA:")[1].trim();
+      if (data.idea_lista) {
         setTimeout(() => {
-          setIdea(ideaRefinada);
+          setIdea(data.idea_refinada);
           setShowChat(false);
           setChatMessages([]);
         }, 1500);
       }
     } catch (err) {
-      console.error("Error Claude API:", err);
+      console.error("Error n8n refinar:", err);
+      setChatError(err.message ?? "Error al conectar con el agente");
     } finally {
       setChatLoading(false);
     }
   };
 
   const handleRefinarIdea = async () => {
-    const initialMsg = idea.trim()
+    const mensaje = idea.trim()
       ? `Quiero crear contenido para ${redSocial}. Mi idea: ${idea}`
       : `Quiero crear contenido para ${redSocial}. No tengo idea definida, ayúdame a definir una.`;
-    const messages = [{ role: "user", content: initialMsg }];
-    setChatMessages(messages);
+    setChatMessages([{ role: "user", content: mensaje }]);
     setShowChat(true);
-    await callClaude(messages);
+    await callN8nRefinar(mensaje, []);
   };
 
   const handleSendChat = async () => {
     if (!chatInput.trim() || chatLoading) return;
-    const updated = [...chatMessages, { role: "user", content: chatInput }];
-    setChatMessages(updated);
+    const mensaje = chatInput;
+    const historial = chatMessages;
+    setChatMessages([...chatMessages, { role: "user", content: mensaje }]);
     setChatInput("");
-    await callClaude(updated);
+    await callN8nRefinar(mensaje, historial);
   };
 
   // --- Webhook n8n ---
@@ -317,6 +310,13 @@ export default function CrearContenido({ empresa, onCambiarEmpresa }) {
                     <div className="flex justify-start">
                       <div className="bg-[#2A2A2A] px-4 py-3 rounded-lg">
                         <Loader />
+                      </div>
+                    </div>
+                  )}
+                  {chatError && (
+                    <div className="flex justify-start">
+                      <div className="bg-red-900/30 border border-red-500/40 px-3 py-2 rounded-lg text-sm text-red-400">
+                        Error: {chatError}
                       </div>
                     </div>
                   )}
