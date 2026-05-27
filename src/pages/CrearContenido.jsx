@@ -9,10 +9,10 @@ const SYSTEM_PROMPT =
   "Eres un estratega creativo de contenido para redes sociales. Tu trabajo es ayudar al usuario a refinar su idea para crear contenido visual impactante. Haz máximo 2 preguntas cortas y concretas para entender mejor la idea. Cuando tengas suficiente contexto, di 'IDEA LISTA:' seguido de un resumen conciso de la idea refinada lista para generar. Sé directo y conciso.";
 
 const ACTION_BUTTONS = [
-  { icon: "✏️", label: "Editar", desc: "Modifica elementos específicos de la imagen" },
-  { icon: "📝", label: "Layerize", desc: "Extrae el texto para editarlo libremente" },
-  { icon: "⬇️", label: "Descargar", desc: "Guarda la imagen en tu dispositivo" },
-  { icon: "🔄", label: "Nueva", desc: "Genera una nueva variación" },
+  { icon: "✏️", label: "Editar", tooltip: "Modifica elementos específicos" },
+  { icon: "📝", label: "Layerize", tooltip: "Extrae el texto para editarlo" },
+  { icon: "⬇️", label: "Descargar", tooltip: "Guarda la imagen" },
+  { icon: "🔄", label: "Nueva", tooltip: "Genera una variación" },
 ];
 
 export default function CrearContenido({ empresa, onCambiarEmpresa }) {
@@ -391,27 +391,30 @@ export default function CrearContenido({ empresa, onCambiarEmpresa }) {
             </div>
 
             {/* Botones de acción */}
-            <div className="grid grid-cols-4 gap-2">
-              {ACTION_BUTTONS.map(({ icon, label }) => (
-                <button
-                  key={label}
-                  onClick={() => handleActionClick(label)}
-                  disabled={!imagenUrl || generando}
-                  className="flex flex-col items-center gap-1.5 py-3 px-2 bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg text-xs text-[#888888] hover:border-[#444444] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  <span className="text-base">{icon}</span>
-                  <span>{label}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Leyendas */}
-            <div className="grid grid-cols-4 gap-2">
-              {ACTION_BUTTONS.map(({ label, desc }) => (
-                <p key={label} className="text-[#555555] text-xs text-center leading-tight">
-                  {desc}
-                </p>
-              ))}
+            <div className="flex gap-2">
+              {ACTION_BUTTONS.map(({ icon, label, tooltip }) => {
+                const enabled = !!imagenUrl && !generando;
+                return (
+                  <div key={label} className="relative group flex-1">
+                    <button
+                      onClick={() => handleActionClick(label)}
+                      disabled={!enabled}
+                      className={`w-full flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border text-xs font-medium transition-colors disabled:cursor-not-allowed ${
+                        enabled
+                          ? "bg-[#1A1A1A] border-[#2A2A2A] text-[#888888] hover:border-[#00D084] hover:text-[#00D084]"
+                          : "bg-[#1A1A1A] border-[#2A2A2A] text-[#444444] opacity-40"
+                      }`}
+                    >
+                      <span>{icon}</span>
+                      <span>{label}</span>
+                    </button>
+                    {/* Tooltip */}
+                    <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#2A2A2A] border border-[#333333] text-white text-xs rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      {tooltip}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Panel de edición */}
